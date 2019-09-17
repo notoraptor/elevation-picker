@@ -1,13 +1,153 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+	"Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+	sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+	monospace;
+}
+
+html, body, #root, .container-fluid {
+	width: 100%;
+	height: 100%;
+}
+
+.map-container {
+}
+
+#search-form input {
+	height: 100%;
+	border-color: gray;
+	border-radius: 0.5rem;
+	padding: 1rem 1rem 1rem 2rem;
+}
+
+#search-form .octicon {
+	position: absolute;
+	width: 1rem;
+	margin-left: 0.5rem;
+	height: 100%;
+	pointer-events: none;
+	z-index: 1;
+}
+
+#search-form .autocomplete {
+	position: relative;
+	height: 100%;
+}
+
+/* smaller than -md- */
+@media (max-width: 768px) {
+	#search-form button {
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.home button.learn-more {
+		width: 100%;
+	}
+}
+
+.search-waiting-no {
+	opacity: 0;
+	max-height: 0;
+	padding: 0;
+	transition: opacity 500ms ease-in-out, padding 300ms ease-in-out 300ms, max-height 300ms ease-in-out 300ms;
+}
+.search-waiting-yes {
+	opacity: 1;
+	max-height: 10rem;
+	padding: 1.5rem 0.5rem 0 0.5rem;
+	transition: opacity 500ms ease-in-out, max-height 500ms ease-in-out, padding 500ms ease-in-out;
+}
+
+#search-form .autocomplete {
+	position: relative;
+	height: 100%;
+}
+
+.autocomplete-items {
+	position: absolute;
+	border: 1px solid #d4d4d4;
+	border-bottom: none;
+	z-index: 99;
+	/*position the autocomplete items to be the same width as the container:*/
+	top: 100%;
+	left: 0;
+	right: 0;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+	/*when hovering an item:*/
+	background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+	/*when navigating through the items using the arrow keys:*/
+	background-color: DodgerBlue !important;
+	color: #ffffff;
+}
+
+#google-map-view {
+	width: 100%;
+	height: 20rem;
+	border: 1px solid gray;
+	border-radius: 0.5rem;
+}
+
+#google-map-view .google-map-geolocation-button,
+#google-map-view .google-map-street-button {
+	font-weight: bold;
+	font-size: 1rem;
+	background-color: white;
+	margin: 10px;
+	height: 40px;
+	line-height: 40px;
+	color: black;
+	box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+	cursor: pointer;
+	text-align: center;
+}
+
+#google-map-view .google-map-street-button {
+	margin-left: -10px;
+	padding-left: 17px;
+	padding-right: 17px;
+}
+
+#google-map-view .google-map-geolocation-button {
+	width: 40px;
+}
+
+#google-map-view .google-map-geolocation-button path {
+	stroke: #666666;
+	fill: #666666;
+}
+
+#google-map-view .google-map-geolocation-button:hover path {
+	stroke: black;
+	fill: black;
+}
+
+.google-map-geolocation-button {
+	padding: 8px 8px;
+}
+.google-map-geolocation-button svg {
+	display: block;
+}
+
+#google-map-view .google-map-street-button:hover {
+	background-color: rgb(225, 225, 225);
 }
