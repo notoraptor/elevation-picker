@@ -25,6 +25,7 @@ export class App extends React.Component {
 						<Helmet><title>Elevation Picker</title></Helmet>
 						<div className="d-flex flex-column w-100 h-100">
 							<h1 className="text-center">Elevation Picker</h1>
+							<h4 className="text-center" id="info">&nbsp;</h4>
 							<div className="flex-grow-1 map-container">
 								<AddressManager/>
 							</div>

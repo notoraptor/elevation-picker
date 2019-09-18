@@ -179,6 +179,11 @@ export class GoogleView extends React.Component {
 				editable: false
 			});
 			this.zone.addListener('click', this.onMapClick);
+
+			const bounds = this.zone.getBounds();
+			const northEast = bounds.getNorthEast();
+			const southWest = bounds.getSouthWest();
+			document.getElementById('info').textContent = `${northEast.lat()} ${southWest.lng()} ${southWest.lat()} ${northEast.lng()}`;
 		}
 	}
 
@@ -192,9 +197,7 @@ export class GoogleView extends React.Component {
 			});
 		this.computeElevationForCoordinates([position])
 			.then(results => {
-				console.log('LEN', results.length);
-				console.log('ALT', results[0].elevation);
-				console.log('RES', results[0].resolution);
+				console.log(`Altitude ${results[0].elevation}, resolution ${results[0].resolution}`);
 			});
 	}
 
@@ -374,7 +377,7 @@ export class GoogleView extends React.Component {
 		});
 	}
 
-	computeBatchElevation(coordinates, from, collector, resolve, reject, i) {
+	computeBatchElevation(coordinates, from, collector, resolve, reject) {
 		if (from < 0)
 			return reject('INDEX_OUT_OF_RANGE');
 		if (from >= coordinates.length) {
@@ -386,20 +389,20 @@ export class GoogleView extends React.Component {
 		const remainingLength = coordinates.length - from;
 		const size = maxSize < remainingLength ? maxSize : remainingLength;
 		setTimeout(() => {
-			console.log(`Collecting ... ${from} for ${coordinates.length}`);
+			console.log(`Collecting from ${from} on ${coordinates.length} points ...`);
 			this.computeElevationForCoordinates(coordinates.slice(from, from + size))
 				.then(results => {
-					console.log(`Collected ${from} for ${coordinates.length}`);
+					console.log(`Collected.`);
 					collector.push(...results);
-					this.computeBatchElevation(coordinates, from + size, collector, resolve, reject, i + 1);
+					this.computeBatchElevation(coordinates, from + size, collector, resolve, reject);
 				})
 				.catch(reject);
-		}, 5000);
+		}, 100);
 	}
 
 	computeAllElevations(coordinates) {
 		return new Promise((resolve, reject) => {
-			this.computeBatchElevation(coordinates, 0, [], resolve, reject, 0);
+			this.computeBatchElevation(coordinates, 0, [], resolve, reject);
 		});
 	}
 
@@ -429,10 +432,11 @@ export class GoogleView extends React.Component {
 				points.push(new google.maps.LatLng(lat, lng));
 			}
 			console.log(`Computed ${points.length} points (${side} x ${side}).`);
-			console.log(`Latest point: ${points[points.length - 1]} vs expected ${southEast}`);
+			console.log(`Latest point: ${points[points.length - 1]}`);
+			console.log(`Latest expected point: ${southEast}`);
 			this.computeAllElevations(points)
 				.then(results => {
-					console.log('LEN', results.length);
+					console.log(`Finished computing ${results.length} points.`);
 					const canvas = document.createElement('canvas');
 					const ctx = canvas.getContext('2d');
 					canvas.width = side;
@@ -460,102 +464,19 @@ export class GoogleView extends React.Component {
 					}
 					ctx.putImageData(imageData, 0, 0);
 					const imageURL = canvas.toDataURL();
-					/*
-					const image = new Image();
-					image.src = imageURL;
-					image.style.position = "absolute";
-					document.body.appendChild(image);
-					*/
 					const domLink = document.createElement('a');
 					domLink.setAttribute('href', imageURL);
-					domLink.setAttribute('download', `elevation.json`);
+					domLink.setAttribute('download', `elevation.png`);
 					domLink.style.display = 'none';
 					document.body.appendChild(domLink);
 					domLink.click();
 					document.body.removeChild(domLink);
-					/*
-					const output = {
-						width: side,
-						height: side,
-						values: results.map(result => ({
-							lat: result.location.lat(),
-							lng: result.location.lng(),
-							alt: result.elevation,
-							res: result.resolution
-						}))
-					};
-					const domLink = document.createElement('a');
-					domLink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(output)));
-					domLink.setAttribute('download', `elevation.json`);
-					domLink.style.display = 'none';
-					document.body.appendChild(domLink);
-					domLink.click();
-					document.body.removeChild(domLink);
-					*/
 				})
 				.catch(error => {
 					const message = `An error occurred while computing elevation (${error}).`;
 					console.exception(message);
 					alert(message);
 				});
-			/*
-			return;
-			this.computeElevationForCoordinates(points)
-				.then(results => {
-					const canvas = document.createElement('canvas');
-					const ctx = canvas.getContext('2d');
-					canvas.width = side;
-					canvas.height = side;
-					const imageData = ctx.getImageData(0, 0, side, side);
-					const data = imageData.data;
-					const nbPixels = side * side;
-					let minElevation = results[0].elevation;
-					let maxElevation = minElevation;
-					for (let i = 1; i < nbPixels; ++i) {
-						const elevation = results[i].elevation;
-						if (minElevation > elevation)
-							minElevation = elevation;
-						if (maxElevation < elevation)
-							maxElevation = elevation;
-					}
-					for (let i = 0; i < nbPixels; ++i) {
-						const elevation = results[i].elevation;
-						const normalizedResolution = maxElevation !== minElevation ? (elevation - minElevation) / (maxElevation - minElevation) : 0;
-						const gray = normalizedResolution * 255;
-						data[4 * i] = gray;
-						data[4 * i + 1] = gray;
-						data[4 * i + 2] = gray;
-						data[4 * i + 3] = 255;
-					}
-					ctx.putImageData(imageData, 0, 0);
-					const image = new Image();
-					image.src = canvas.toDataURL();
-					image.style.position = "absolute";
-					document.body.appendChild(image);
-					const output = {
-						width: side,
-						height: side,
-						values: results.map(result => ({
-							lat: result.location.lat(),
-							lng: result.location.lng(),
-							alt: result.elevation,
-							res: result.resolution
-						}))
-					};
-					const domLink = document.createElement('a');
-					domLink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(output)));
-					domLink.setAttribute('download', `elevation.json`);
-					domLink.style.display = 'none';
-					document.body.appendChild(domLink);
-					domLink.click();
-					document.body.removeChild(domLink);
-				})
-				.catch(error => {
-					const message = `An error occurred while computing elevation (${error}).`;
-					console.exception(message);
-					alert(message);
-				})
-			*/
 		}
 	}
 
