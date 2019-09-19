@@ -176,7 +176,7 @@ export class GoogleView extends React.Component {
 				fillOpacity: 0.35,
 				map: this.map,
 				bounds: {north: top.lat(), south: bottom.lat(), east: right.lng(), west: left.lng()},
-				editable: false
+				editable: true
 			});
 			this.zone.addListener('click', this.onMapClick);
 
@@ -414,6 +414,7 @@ export class GoogleView extends React.Component {
 			const southWest = bounds.getSouthWest();
 			const northWest = new google.maps.LatLng(northEast.lat(), southWest.lng());
 			const southEast = new google.maps.LatLng(southWest.lat(), northEast.lng());
+			document.getElementById('info').textContent = `${northEast.lat()} ${southWest.lng()} ${southWest.lat()} ${northEast.lng()}`;
 
 			const div = 20;
 			const latGap = Math.abs(southWest.lat() - northWest.lat());
